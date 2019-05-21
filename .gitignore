@@ -1,2 +1,8 @@
 env/*
 .vscode/*
+references/*
+midi_files/*
+midi_renders/*
+output/*
+*.pyc
+.DS_Store
