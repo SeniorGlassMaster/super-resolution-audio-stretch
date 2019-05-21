@@ -5,7 +5,7 @@ from librosa.core import resample
 # Takes input mono audio track, stretches it to twice its length (interpolating
 # samples through average of adjacent samples), and splits into arrays of
 # window_size.
-def preprocess_input(src, window_size=320):
+def preprocess_input_data(src, window_size=320):
     if not isinstance(src.size, int):
         raise ValueError("Non-mono track input.")
     
@@ -21,7 +21,7 @@ def preprocess_input(src, window_size=320):
             double_length[i] = src[int(i / 2)]
         
         # Print progress
-        if not i % 100000 or i == double_length.size - 1:
+        if i % 100000 == 0 or i == double_length.size - 1:
             progress = 100 * ((i + 1) / double_length.size)
             if progress != 100:
                 progress = str(progress)[:4]
@@ -36,8 +36,8 @@ def preprocess_input(src, window_size=320):
     print('   Finished preprocess')
     return window_split
 
-# Splits training output into arrays of window_size
-def preprocess_output(src, window_size=320):
+# Splits target audio into arrays of window_size
+def preprocess_target_data(src, window_size=320):
     window_split = [src[i * window_size:(i + 1) * window_size] \
                     for i in range((src.size + window_size - 1) // window_size )]
     window_split = np.asarray(window_split)
