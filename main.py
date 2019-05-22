@@ -17,7 +17,7 @@ def train_model(model, input_data, target_data, optimizer, epoch):
         input_window = torch.tensor(np.array([[input_data[i]]]))
         target_window = torch.tensor(np.array([[target_data[i]]]))
         optimizer.zero_grad()
-        output = model(input_window)
+        output = model(input_window.double())
         train_loss = loss(output, target_window.double())
         train_loss.backward()
         total_loss += train_loss.mean()
@@ -42,11 +42,26 @@ def test_model(model, input_data, target_data):
     print('\nTest set: Average loss: {:.4f}'.format(test_loss))
     
     stitched_audio = np.array(stitched_audio)
-    stitched_audio = np.concatenate(stitched_audio, axis=None)
+    # stitched_audio = np.concatenate(stitched_audio, axis=None)
     return stitched_audio
 
+def render_audio(model_output, path, sample_rate, window_size=320, overlap=10000):
+    rendered = np.zeros(window_size * model_output.size)
+    r_index = 0
+    for i in range(model_output.size):
+        for j in range(model_output[i].size):
+            if j < overlap:
+                rendered[r_index + j] = rendered[r_index + j] + (model_output[i][j] * (j / float(overlap)))
+            elif j >= (window_size - overlap - 1):
+                rendered[r_index + j] = rendered[r_index + j] + (model_output[i][j] * ((window_size - j - 1) / float(overlap)))
+            else:
+                rendered[r_index + j] = model_output[i][j]
+        r_index += (window_size - overlap - 1)
+    rendered = np.array(rendered)
+    write_wav(path, rendered, sample_rate)
+
 def main():
-    WINDOW_SIZE = 2000
+    WINDOW_SIZE = 20000
     NUM_EPOCHS = 8
     LEARNING_RATE = 1e-2
     input_audio, sr = load("./midi_renders/fugue_1_plucks.wav")
@@ -64,12 +79,12 @@ def main():
     for epoch in range(1, NUM_EPOCHS + 1):
         train_model(model, input_audio, target_audio, optimizer, epoch)
     
-    input_audio, sr = load("./midi_renders/fugue_2_plucks.wav")
-    target_audio, sr = load("./midi_renders/fugue_2_plucks_slow.wav")
-    input_audio = load_data.preprocess_input_data(input_audio, WINDOW_SIZE)
-    target_audio = load_data.preprocess_target_data(target_audio, WINDOW_SIZE)
+    # input_audio, sr = load("./midi_renders/fugue_2_plucks.wav")
+    # target_audio, sr = load("./midi_renders/fugue_2_plucks_slow.wav")
+    # input_audio = load_data.preprocess_input_data(input_audio, WINDOW_SIZE)
+    # target_audio = load_data.preprocess_target_data(target_audio, WINDOW_SIZE)
     test_result = test_model(model, input_audio, target_audio)
-    write_wav("./output/test_result.wav", test_result, sr)
+    render_audio(test_result, "./output/test_result.wav", sr, window_size=WINDOW_SIZE)
 
 if __name__ == "__main__":
     main()

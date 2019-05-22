@@ -5,7 +5,7 @@ from librosa.core import resample
 # Takes input mono audio track, stretches it to twice its length (interpolating
 # samples through average of adjacent samples), and splits into arrays of
 # window_size.
-def preprocess_input_data(src, window_size=320):
+def preprocess_input_data(src, window_size=320, overlap=10000):
     if not isinstance(src.size, int):
         raise ValueError("Non-mono track input.")
     
@@ -29,19 +29,22 @@ def preprocess_input_data(src, window_size=320):
             else:
                 print('   Stretching audio: 100% complete   ')
     
-    window_split = [double_length[i * window_size:(i + 1) * window_size] \
-                    for i in range((double_length.size + window_size - 1) // window_size )]
-    window_split = np.asarray(window_split)
+    # window_split = [double_length[i * window_size:(i + 1) * window_size] \
+    #                 for i in range((double_length.size + window_size - 1) // window_size )]
+    # window_split = np.asarray(window_split)
 
+    window_split = window_splitter(double_length, window_size, overlap)
     print('   Finished preprocess')
     return window_split
 
 # Splits target audio into arrays of window_size
-def preprocess_target_data(src, window_size=320):
-    window_split = [src[i * window_size:(i + 1) * window_size] \
-                    for i in range((src.size + window_size - 1) // window_size )]
-    window_split = np.asarray(window_split)
+def preprocess_target_data(src, window_size=320, overlap=10000):
+    return window_splitter(src, window_size, overlap)
 
-    return window_split
-
-# def load_data():
+def window_splitter(src, window_size=320, overlap=10000):
+    window_split = []
+    i = 0
+    while i < src.size:
+        window_split.append(src[i:(i+window_size)])
+        i += window_size - overlap - 1
+    return np.array(window_split)
