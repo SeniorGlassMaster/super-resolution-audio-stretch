@@ -4,16 +4,17 @@ import torch.nn.functional as F
 import numpy as np
 from hyperparameters import *
 
-class NN_Model(nn.Module):
+class Post_Upscale_Model(nn.Module):
 
     def __init__(self):
-        super(NN_Model, self).__init__()
-        # self.conv1 = nn.Conv1d(1,1,9)
-        self.conv1 = nn.Conv1d(1, 1, 91, padding=45)
-        self.relu1 = nn.Sigmoid()
+        super(Post_Upscale_Model, self).__init__()
+        self.conv1 = nn.Conv1d(1, 1, 161, padding=80)
+        self.sigm1 = nn.Sigmoid()
         self.conv2 = nn.Conv1d(1,1,1)
-        self.relu2 = nn.Sigmoid()
-        self.conv3 = nn.Conv1d(1,1,51, padding=25)
+        self.sigm2 = nn.Sigmoid()
+        self.conv3 = nn.Conv1d(1,1,91, padding=45)
+        self.sigm3 = nn.Sigmoid()
+        self.upscale = nn.ConvTranspose1d(1,1,51,padding=25)
         
         # super(SRCNN,self).__init__()
         # self.conv1 = nn.Conv2d(3,64,kernel_size=9,padding=4);
@@ -24,8 +25,10 @@ class NN_Model(nn.Module):
 
     def forward(self, x):
         out = self.conv1(x)
-        out = self.relu1(out)
+        out = self.sigm1(out)
         out = self.conv2(out)
-        out = self.relu2(out)
+        out = self.sigm2(out)
         out = self.conv3(out)
+        out = self.sigm3(out)
+        out = self.upscale(out)
         return out

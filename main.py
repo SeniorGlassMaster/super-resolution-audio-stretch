@@ -7,7 +7,8 @@ import numpy as np
 from librosa.core import load
 from librosa.output import write_wav
 import load_data
-from model import NN_Model
+from pre_upscale_model import Pre_Upscale_Model
+from post_upscale_model import Post_Upscale_Model
 from hyperparameters import *
 
 def train_model(model, input_data, target_data, optimizer, epoch):
@@ -66,14 +67,18 @@ def render_audio(model_output, path, sample_rate, window_size=WINDOW_SIZE, overl
 def main():
     input_audio, sr = load("./midi_renders/fugue_1_plucks.wav")
     target_audio, sr = load("./midi_renders/fugue_1_plucks_slow.wav")
-    input_audio = load_data.preprocess_input_data(input_audio, WINDOW_SIZE)
-    target_audio = load_data.preprocess_target_data(target_audio, WINDOW_SIZE)
-    assert input_audio.size == target_audio.size
+    if (MODEL == 'pre'):
+        input_audio = load_data.preprocess_input_data(input_audio, WINDOW_SIZE)
+        target_audio = load_data.preprocess_target_data(target_audio, WINDOW_SIZE)
+        assert input_audio.size == target_audio.size
+    else:
+        input_audio = load_data.window_splitter(input_audio, WINDOW_SIZE)
+        target_audio = load_data.window_splitter(target_audio, WINDOW_SIZE)
 
     device = torch.device("cuda" if USE_CUDA else "cpu")
-    model = NN_Model().to(device)
+    model = Pre_Upscale_Model().to(device) if MODEL == 'pre' else Post_Upscale_Model().to(device)
     model = model.double()
-    optimizer = optim.Adam(model.parameters(), LEARNING_RATE)
+    optimizer = optim.Adadelta(model.parameters(), LEARNING_RATE)
 
     for epoch in range(1, NUM_EPOCHS + 1):
         train_model(model, input_audio, target_audio, optimizer, epoch)
