@@ -1,11 +1,12 @@
 import math
 import numpy as np
 from librosa.core import resample
+from hyperparameters import *
 
 # Takes input mono audio track, stretches it to twice its length (interpolating
 # samples through average of adjacent samples), and splits into arrays of
 # window_size.
-def preprocess_input_data(src, window_size=320, overlap=10000):
+def preprocess_input_data(src, window_size=WINDOW_SIZE, overlap=OVERLAP):
     if not isinstance(src.size, int):
         raise ValueError("Non-mono track input.")
     
@@ -38,10 +39,10 @@ def preprocess_input_data(src, window_size=320, overlap=10000):
     return window_split
 
 # Splits target audio into arrays of window_size
-def preprocess_target_data(src, window_size=320, overlap=10000):
+def preprocess_target_data(src, window_size=WINDOW_SIZE, overlap=OVERLAP):
     return window_splitter(src, window_size, overlap)
 
-def window_splitter(src, window_size=320, overlap=10000):
+def window_splitter(src, window_size=WINDOW_SIZE, overlap=OVERLAP):
     window_split = []
     i = 0
     while i < src.size:

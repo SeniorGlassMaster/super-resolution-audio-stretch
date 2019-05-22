@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+from hyperparameters import *
 
 class NN_Model(nn.Module):
 
