@@ -8,13 +8,12 @@ class Post_Upscale_Model(nn.Module):
 
     def __init__(self):
         super(Post_Upscale_Model, self).__init__()
-        self.conv1 = nn.Conv1d(1, 1, 161, padding=80)
+        self.conv1 = nn.Conv1d(1, 1, 201, padding=100)
         self.sigm1 = nn.Sigmoid()
-        self.conv2 = nn.Conv1d(1,1,1)
+        self.conv2 = nn.Conv1d(1,1,91, padding=45)
         self.sigm2 = nn.Sigmoid()
-        self.conv3 = nn.Conv1d(1,1,91, padding=45)
-        self.sigm3 = nn.Sigmoid()
-        self.upscale = nn.ConvTranspose1d(1,1,51,padding=25)
+        # self.upscale = nn.ConvTranspose1d(1,1,int(WINDOW_SIZE/2)+1)
+        self.upscale = nn.ConvTranspose1d(1,1,2,stride=2)
         
         # super(SRCNN,self).__init__()
         # self.conv1 = nn.Conv2d(3,64,kernel_size=9,padding=4);
@@ -28,7 +27,5 @@ class Post_Upscale_Model(nn.Module):
         out = self.sigm1(out)
         out = self.conv2(out)
         out = self.sigm2(out)
-        out = self.conv3(out)
-        out = self.sigm3(out)
         out = self.upscale(out)
         return out
