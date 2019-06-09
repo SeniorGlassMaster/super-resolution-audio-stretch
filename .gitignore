@@ -3,6 +3,7 @@ references/*
 midi_files/*
 midi_renders/*
 output/*
+model_saves/*
 *.pyc
 .DS_Store
 .vscode
