@@ -14,6 +14,9 @@ class Post_Upscale_Model(nn.Module):
         self.sigm2 = nn.Sigmoid()
         self.upscale = nn.ConvTranspose1d(1,1,int(WINDOW_SIZE/2)+1)
         # self.upscale = nn.ConvTranspose1d(1,1,2,stride=2)
+        self.conv3 = nn.Conv1d(1,1,91, padding=45)
+        self.lin1 = nn.Linear(WINDOW_SIZE, WINDOW_SIZE)
+        self.lin2 = nn.Linear(WINDOW_SIZE, WINDOW_SIZE)
 
     def forward(self, x):
         out = self.conv1(x)
@@ -21,4 +24,7 @@ class Post_Upscale_Model(nn.Module):
         out = self.conv2(out)
         out = self.sigm2(out)
         out = self.upscale(out)
+        out = self.conv3(out)
+        out = self.lin1(out)
+        out = self.lin2(out)
         return out
