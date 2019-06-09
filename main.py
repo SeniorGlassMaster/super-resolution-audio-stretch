@@ -107,7 +107,7 @@ def main():
         train_model(model, input_audio, target_audio, optimizer, epoch)
         cur_save_path = SAVE_PATH + "_e" + str(epoch)
         torch.save(model.state_dict(), cur_save_path)
-        print("Saved model to " + cur_save_path)
+        print("   Saved model to " + cur_save_path)
 
     # input_audio, sr = load("./midi_renders/fugue_2_plucks.wav")
     # target_audio, sr = load("./midi_renders/fugue_2_plucks_slow.wav")
