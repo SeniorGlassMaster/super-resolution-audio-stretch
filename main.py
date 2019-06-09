@@ -15,7 +15,14 @@ def train_model(model, input_data, target_data, optimizer, epoch):
     model.train()
     loss = nn.MSELoss()
     total_loss = 0
-    sample_size = input_data.shape[0]
+    # TODO
+    # TODO
+    # TODO
+    # TODO: GET RID OF - 10
+    # TODO
+    # TODO
+    # TODO
+    sample_size = input_data.shape[0] - 10
     for i in range(sample_size):
         input_window = torch.tensor(np.array([[input_data[i]]]))
         target_window = torch.tensor(np.array([[target_data[i]]]))
@@ -40,7 +47,14 @@ def test_model(model, input_data, target_data):
     test_loss = 0
     stitched_audio = []
     with torch.no_grad():
-        for i in range(input_data.shape[0]):
+        # TODO
+        # TODO
+        # TODO
+        # TODO: GET RID OF - 10
+        # TODO
+        # TODO
+        # TODO
+        for i in range(input_data.shape[0] - 10):
             input_window = torch.tensor([[input_data[i]]])
             target_window = torch.tensor([[target_data[i]]])
             output = model(input_window.double())
@@ -91,6 +105,9 @@ def main():
     print("Training model...")
     for epoch in range(1, NUM_EPOCHS + 1):
         train_model(model, input_audio, target_audio, optimizer, epoch)
+        cur_save_path = SAVE_PATH + "_e" + str(epoch)
+        torch.save(model.state_dict(), cur_save_path)
+        print("Saved model to " + cur_save_path)
 
     # input_audio, sr = load("./midi_renders/fugue_2_plucks.wav")
     # target_audio, sr = load("./midi_renders/fugue_2_plucks_slow.wav")
