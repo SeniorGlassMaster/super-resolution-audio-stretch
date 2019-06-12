@@ -8,12 +8,13 @@ class Pre_Upscale_Model(nn.Module):
 
     def __init__(self):
         super(Pre_Upscale_Model, self).__init__()
-        self.conv1 = nn.Conv1d(1, 1, 161, padding=80)
-        self.relu1 = nn.Sigmoid()
+        self.pad1 = nn.ReflectionPad1d(25)
+        self.conv1 = nn.Conv1d(1,1,51)
+        self.sigm1 = nn.Sigmoid()
         self.conv2 = nn.Conv1d(1,1,1)
-        self.relu2 = nn.Sigmoid()
-        self.conv3 = nn.Conv1d(1,1,91, padding=45)
-        self.lin1 = nn.Linear(WINDOW_SIZE, WINDOW_SIZE)
+        self.sigm2 = nn.Sigmoid()
+        self.pad2 = nn.ReflectionPad1d(12)
+        self.conv3 = nn.Conv1d(1,1,25)
         
         # super(SRCNN,self).__init__()
         # self.conv1 = nn.Conv2d(3,64,kernel_size=9,padding=4);
@@ -23,10 +24,11 @@ class Pre_Upscale_Model(nn.Module):
         # self.conv3 = nn.Conv2d(32,3,kernel_size=5,padding=2);
 
     def forward(self, x):
-        out = self.conv1(x)
-        out = self.relu1(out)
+        out = self.pad1(x)
+        out = self.conv1(out)
+        out = self.sigm1(out)
         out = self.conv2(out)
-        out = self.relu2(out)
+        out = self.sigm2(out)
+        out = self.pad2(out)
         out = self.conv3(out)
-        out = self.lin1(out)
         return out
