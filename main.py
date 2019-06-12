@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import math
 import numpy as np
 from librosa.core import load
 import matplotlib.pyplot as plt
@@ -14,8 +13,8 @@ from export_audio import *
 
 def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, line, fig):
     model.train()
-    # loss = nn.MSELoss()
-    loss = nn.L1Loss()
+    loss = nn.MSELoss()
+    # loss = nn.L1Loss()
     total_loss = 0
     sample_size = input_data.shape[0]
     for i in range(sample_size):
@@ -31,12 +30,12 @@ def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, lin
         optimizer.step()
         progress = 100 * ((i + 1) / sample_size)
         if progress != 100 and (int(progress * 10) % 7) == 0:
-            progress = str(progress)[:4]
-            print('   Epoch {}: {}% complete   '.format(epoch, progress), end='\r')
+            progress_str = str(progress)[:4]
+            print('   Epoch {}: {}% complete   '.format(epoch, progress_str), end='\r')
         elif progress == 100:
             print('   Epoch {}: 100% complete   '.format(epoch))
         
-        if i % 100 == 0:
+        if i % 1000 == 0:
             plt.pause(0.00001)
             line.set_xdata(list(range(len(loss_plot))))
             line.set_ydata(loss_plot)
@@ -68,8 +67,8 @@ def test_model(model, input_data, target_data):
 
 def main():
     print("Loading audio files...")
-    input_audio, sr = load("./midi_renders/fugue_1_plucks.wav", sr=None)
-    target_audio, sr = load("./midi_renders/fugue_1_plucks_slow.wav", sr=None)
+    input_audio, sr = load("./midi_renders/fugue_1_plucks.wav")
+    target_audio, sr = load("./midi_renders/fugue_1_plucks_slow.wav")
     if (MODEL == 'pre'):
         input_audio = load_data.preprocess_input_data(input_audio, WINDOW_SIZE)
         target_audio = load_data.preprocess_target_data(target_audio, WINDOW_SIZE)
@@ -93,7 +92,7 @@ def main():
         plt.ion()
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        line1, = ax.plot(x_plot, loss_plot, 'b-')
+        line1, = ax.plot(x_plot, loss_plot, 'r-')
         for epoch in range(1, NUM_EPOCHS + 1):
             train_model(model, input_audio, target_audio, optimizer, epoch, loss_plot, line1, fig)
             cur_save_path = SAVE_PATH + "_e" + str(epoch)

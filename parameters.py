@@ -1,12 +1,13 @@
 MODEL = 'pre'
 # MODEL = 'post'
+
 LOAD_MODEL = False
-LOAD_MODEL_PATH = "./model_saves/pre_model_0_e4"
+LOAD_MODEL_PATH = "./model_saves/pre_model_0_e5"
 
 WINDOW_SIZE = 5000
-OVERLAP = 30
+OVERLAP = 100
 NUM_EPOCHS = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-6
 USE_CUDA = False
 
 MODEL_NAME = "pre_model_0"

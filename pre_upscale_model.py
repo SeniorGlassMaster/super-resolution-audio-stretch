@@ -8,13 +8,13 @@ class Pre_Upscale_Model(nn.Module):
 
     def __init__(self):
         super(Pre_Upscale_Model, self).__init__()
-        self.pad1 = nn.ReflectionPad1d(25)
-        self.conv1 = nn.Conv1d(1,1,51)
+        self.pad1 = nn.ReflectionPad1d(4)
+        self.conv1 = nn.Conv1d(1,1,9)
         self.sigm1 = nn.Sigmoid()
         self.conv2 = nn.Conv1d(1,1,1)
         self.sigm2 = nn.Sigmoid()
-        self.pad2 = nn.ReflectionPad1d(12)
-        self.conv3 = nn.Conv1d(1,1,25)
+        self.pad2 = nn.ReflectionPad1d(2)
+        self.conv3 = nn.Conv1d(1,1,5)
         
         # super(SRCNN,self).__init__()
         # self.conv1 = nn.Conv2d(3,64,kernel_size=9,padding=4);

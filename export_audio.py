@@ -1,4 +1,5 @@
 from librosa.output import write_wav
+from librosa.util import normalize
 from parameters import *
 import numpy as np
 
@@ -15,4 +16,5 @@ def render_audio(model_output, path, sample_rate, window_size=WINDOW_SIZE, overl
                 rendered[r_index + j] = float(model_output[i][j])
         r_index += (window_size - overlap - 1)
     rendered = np.array(rendered)
+    rendered = normalize(rendered)
     write_wav(path, rendered, sample_rate)
