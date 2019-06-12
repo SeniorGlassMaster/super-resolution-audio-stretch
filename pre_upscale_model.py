@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from hyperparameters import *
+from parameters import *
 
 class Pre_Upscale_Model(nn.Module):
 
@@ -13,6 +13,7 @@ class Pre_Upscale_Model(nn.Module):
         self.conv2 = nn.Conv1d(1,1,1)
         self.relu2 = nn.Sigmoid()
         self.conv3 = nn.Conv1d(1,1,91, padding=45)
+        self.lin1 = nn.Linear(WINDOW_SIZE, WINDOW_SIZE)
         
         # super(SRCNN,self).__init__()
         # self.conv1 = nn.Conv2d(3,64,kernel_size=9,padding=4);
@@ -27,4 +28,5 @@ class Pre_Upscale_Model(nn.Module):
         out = self.conv2(out)
         out = self.relu2(out)
         out = self.conv3(out)
+        out = self.lin1(out)
         return out

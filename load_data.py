@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from librosa.core import resample
-from hyperparameters import *
+from parameters import *
 
 # Takes input mono audio track, stretches it to twice its length (interpolating
 # samples through average of adjacent samples), and splits into arrays of
@@ -29,10 +29,6 @@ def preprocess_input_data(src, window_size=WINDOW_SIZE, overlap=OVERLAP):
                 print('   Stretching audio: {}% complete   '.format(progress), end='\r')
             else:
                 print('   Stretching audio: 100% complete   ')
-    
-    # window_split = [double_length[i * window_size:(i + 1) * window_size] \
-    #                 for i in range((double_length.size + window_size - 1) // window_size )]
-    # window_split = np.asarray(window_split)
 
     window_split = window_splitter(double_length, window_size, overlap)
     print('   Finished preprocess')

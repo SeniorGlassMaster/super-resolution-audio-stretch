@@ -1,15 +1,14 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 import math
 import numpy as np
 from librosa.core import load
-from librosa.output import write_wav
 import load_data
 from pre_upscale_model import Pre_Upscale_Model
 from post_upscale_model import Post_Upscale_Model
-from hyperparameters import *
+from parameters import *
+from export_audio import *
 
 def train_model(model, input_data, target_data, optimizer, epoch):
     model.train()
@@ -67,23 +66,6 @@ def test_model(model, input_data, target_data):
     stitched_audio = np.array(stitched_audio)
     # stitched_audio = np.concatenate(stitched_audio, axis=None)
     return stitched_audio
-
-def render_audio(model_output, path, sample_rate, window_size=WINDOW_SIZE, overlap=OVERLAP):
-    rendered = np.zeros(window_size * model_output.shape[0])
-    r_index = 0
-    for i in range(model_output.shape[0]):
-        for j in range(model_output[i].shape[0]):
-            if j < overlap:
-                rendered[r_index + j] = rendered[r_index + j] + \
-                                        (model_output[i][j] * (j / float(overlap)))
-            elif j >= (window_size - overlap - 1):
-                rendered[r_index + j] = rendered[r_index + j] + \
-                                        (model_output[i][j] * ((window_size - j - 1) / float(overlap)))
-            else:
-                rendered[r_index + j] = model_output[i][j]
-        r_index += (window_size - overlap - 1)
-    rendered = np.array(rendered)
-    write_wav(path, rendered, sample_rate)
 
 def main():
     print("Loading audio files...")
