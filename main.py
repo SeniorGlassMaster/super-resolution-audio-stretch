@@ -34,7 +34,7 @@ def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, lin
         elif progress == 100:
             print('   Epoch {}: 100% complete   '.format(epoch))
         
-        if i % 1000 == 0:
+        if i % 100 == 0:
             plt.pause(0.00001)
             line.set_xdata(list(range(len(loss_plot))))
             line.set_ydata(loss_plot)
@@ -79,7 +79,7 @@ def main():
     device = torch.device("cuda" if USE_CUDA else "cpu")
     model = Pre_Upscale_Model().to(device) if MODEL == 'pre' else Post_Upscale_Model().to(device)
     model = model.double()
-    optimizer = optim.Adam(model.parameters(), LEARNING_RATE)
+    optimizer = optim.SGD(model.parameters(), LEARNING_RATE, momentum=0.9)
 
     if LOAD_MODEL is True:
         model.load_state_dict(torch.load(LOAD_MODEL_PATH))
@@ -94,7 +94,7 @@ def main():
         line1, = ax.plot(x_plot, loss_plot, 'r-')
         for epoch in range(1, NUM_EPOCHS + 1):
             train_model(model, input_audio, target_audio, optimizer, epoch, loss_plot, line1, fig)
-            cur_save_path = SAVE_PATH + "_e" + str(epoch)
+            cur_save_path = SAVE_PATH + "_e" + str(epoch) + ".pth"
             torch.save(model.state_dict(), cur_save_path)
             print("   Saved model to " + cur_save_path)
 
