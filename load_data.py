@@ -1,7 +1,6 @@
 import math
 import numpy as np
-from librosa.core import resample
-from parameters import *
+from parameters import WINDOW_SIZE, OVERLAP
 
 # Takes input mono audio track, stretches it to twice its length (interpolating
 # samples through average of adjacent samples), and splits into arrays of

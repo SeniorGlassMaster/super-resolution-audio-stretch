@@ -1,7 +1,7 @@
 from librosa.output import write_wav
 from librosa.util import normalize
-from parameters import *
 import numpy as np
+from parameters import WINDOW_SIZE, OVERLAP
 
 def render_audio(model_output, path, sample_rate, window_size=WINDOW_SIZE, overlap=OVERLAP):
     rendered = np.zeros(window_size * model_output.shape[0])

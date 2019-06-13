@@ -4,7 +4,6 @@ import torch.optim as optim
 import numpy as np
 from librosa.core import load
 import matplotlib.pyplot as plt
-from matplotlib import style
 import load_data
 from pre_upscale_model import Pre_Upscale_Model
 from post_upscale_model import Post_Upscale_Model
