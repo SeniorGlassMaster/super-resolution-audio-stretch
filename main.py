@@ -82,7 +82,7 @@ def main():
     optimizer = optim.SGD(model.parameters(), LEARNING_RATE, momentum=0.9)
 
     if LOAD_MODEL is True:
-        model.load_state_dict(torch.load(LOAD_MODEL_PATH))
+        model.load_state_dict(torch.load(LOAD_MODEL_PATH, map_location='cpu'))
         model.eval()
     else:
         print("Training model...")

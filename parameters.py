@@ -2,7 +2,7 @@ MODEL = 'pre'
 # MODEL = 'post'
 
 LOAD_MODEL = True
-LOAD_MODEL_PATH = "./model_saves/pre_model_0_e1.pth"
+LOAD_MODEL_PATH = "./model_saves/pre_model_0_e50.pth"
 
 WINDOW_SIZE = 1000
 OVERLAP = 50
