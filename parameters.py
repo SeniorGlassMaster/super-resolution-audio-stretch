@@ -8,7 +8,6 @@ WINDOW_SIZE = 1000
 OVERLAP = 50
 NUM_EPOCHS = 20
 LEARNING_RATE = 1e-6
-USE_CUDA = False
 
 MODEL_NAME = "pre_model_0"
 SAVE_PATH = "./model_saves/" + MODEL_NAME

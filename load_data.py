@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import librosa
 from parameters import WINDOW_SIZE, OVERLAP
 
 # Takes input mono audio track, stretches it to twice its length (interpolating
@@ -44,3 +45,6 @@ def window_splitter(src, window_size=WINDOW_SIZE, overlap=OVERLAP):
         window_split.append(src[i:(i+window_size)])
         i += window_size - overlap - 1
     return np.array(window_split)
+
+def generate_spectogram(src, sr):
+    return librosa.feature.melspectrogram(y=src, sr=sr)

@@ -76,7 +76,10 @@ def main():
         input_audio = load_data.window_splitter(input_audio, int(WINDOW_SIZE / 2), int(OVERLAP / 2))
         target_audio = load_data.window_splitter(target_audio, WINDOW_SIZE)
 
-    device = torch.device("cuda" if USE_CUDA else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    input_audio = input_audio.to(device)
+    target_audio = target_audio.to(device)
+
     model = Pre_Upscale_Model().to(device) if MODEL == 'pre' else Post_Upscale_Model().to(device)
     model = model.double()
     optimizer = optim.SGD(model.parameters(), LEARNING_RATE, momentum=0.9)
