@@ -24,7 +24,6 @@ def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, lin
         train_loss = loss(output, target_window.double())
         train_loss.backward()
         total_loss += train_loss.sum()
-        loss_plot.append(train_loss.sum().item())
 
         optimizer.step()
         progress = 100 * ((i + 1) / sample_size)
@@ -34,13 +33,15 @@ def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, lin
         elif progress == 100:
             print('   Epoch {}: 100% complete   '.format(epoch))
         
-        if i % 100 == 0:
-            plt.pause(0.00001)
-            line.set_xdata(list(range(len(loss_plot))))
-            line.set_ydata(loss_plot)
-            plt.axis([0,len(loss_plot),0,max(loss_plot)])
-            fig.canvas.draw()
-            fig.canvas.flush_events()
+        if LIVE_GRAPH:
+            loss_plot.append(train_loss.sum().item())
+            if i % 100 == 0:
+                plt.pause(0.00001)
+                line.set_xdata(list(range(len(loss_plot))))
+                line.set_ydata(loss_plot)
+                plt.axis([0,len(loss_plot),0,max(loss_plot)])
+                fig.canvas.draw()
+                fig.canvas.flush_events()
 
     print('   Train Epoch: {} \tLoss: {:.6f}'.format(epoch, total_loss))
 
@@ -68,20 +69,20 @@ def main():
     print("Loading audio files...")
     input_audio, sr = load("./midi_renders/fugue_1_plucks.wav")
     target_audio, sr = load("./midi_renders/fugue_1_plucks_slow.wav")
-    if (MODEL == 'pre'):
-        input_audio = load_data.preprocess_input_data(input_audio, WINDOW_SIZE)
-        target_audio = load_data.preprocess_target_data(target_audio, WINDOW_SIZE)
-        assert input_audio.shape[0] == target_audio.shape[0]
-    else:
-        input_audio = load_data.window_splitter(input_audio, int(WINDOW_SIZE / 2), int(OVERLAP / 2))
-        target_audio = load_data.window_splitter(target_audio, WINDOW_SIZE)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if MODEL == 'pre':
+        input_audio, target_audio = load_data.pre_model_prepare(input_audio, target_audio)
+        model = Pre_Upscale_Model().to(device)
+    elif MODEL == 'post':
+        input_audio, target_audio = load_data.post_model_prepare(input_audio, target_audio)
+        model = Post_Upscale_Model().to(device)
+    
     input_audio = input_audio.to(device)
     target_audio = target_audio.to(device)
-
-    model = Pre_Upscale_Model().to(device) if MODEL == 'pre' else Post_Upscale_Model().to(device)
     model = model.double()
+
     optimizer = optim.SGD(model.parameters(), LEARNING_RATE, momentum=0.9)
 
     if LOAD_MODEL is True:
@@ -89,12 +90,19 @@ def main():
         model.eval()
     else:
         print("Training model...")
-        loss_plot = []
-        x_plot = []
-        plt.ion()
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        line1, = ax.plot(x_plot, loss_plot, 'r-')
+        
+        loss_plot = None
+        line1 = None
+        fig = None
+
+        if LIVE_GRAPH:
+            loss_plot = []
+            x_plot = []
+            plt.ion()
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            line1, = ax.plot(x_plot, loss_plot, 'r-')
+    
         for epoch in range(1, NUM_EPOCHS + 1):
             train_model(model, input_audio, target_audio, optimizer, epoch, loss_plot, line1, fig)
             cur_save_path = SAVE_PATH + "_e" + str(epoch) + ".pth"

@@ -46,5 +46,17 @@ def window_splitter(src, window_size=WINDOW_SIZE, overlap=OVERLAP):
         i += window_size - overlap - 1
     return np.array(window_split)
 
-def generate_spectogram(src, sr):
+def generate_spectrogram(src, sr):
     return librosa.feature.melspectrogram(y=src, sr=sr)
+
+def pre_model_prepare(input_audio, target_audio):
+    input_audio = preprocess_input_data(input_audio, WINDOW_SIZE)
+    target_audio = preprocess_target_data(target_audio, WINDOW_SIZE)
+    assert input_audio.shape[0] == target_audio.shape[0]
+    return input_audio, target_audio
+
+def post_model_prepare(input_audio, target_audio):
+    input_audio = window_splitter(input_audio, int(WINDOW_SIZE / 2), int(OVERLAP / 2))
+    target_audio = window_splitter(target_audio, WINDOW_SIZE)
+    return input_audio, target_audio
+
