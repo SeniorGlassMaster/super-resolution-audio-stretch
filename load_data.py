@@ -75,7 +75,7 @@ def window_splitter(src, window_size=WINDOW_SIZE, overlap=OVERLAP):
     return np.array(window_split)
 
 def generate_spectrogram(src, sr):
-    return scipy.signal.stft(src, fs=sr, nperseg=256, window='hamming')[2]
+    return scipy.signal.stft(src, fs=sr, nperseg=256, window='hann')[2]
 
 def pre_model_prepare(input_audio, target_audio):
     input_audio = preprocess_input_data(input_audio, WINDOW_SIZE)

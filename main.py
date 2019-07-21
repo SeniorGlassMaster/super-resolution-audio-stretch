@@ -78,16 +78,15 @@ def test_model_s(model, input_data, target_data):
             input_window = torch.tensor([[input_data[i]]]).to(device)
             target_window = torch.tensor([[target_data[i]]]).to(device)
             output = model(input_window.double())
-            output = input_window
             stitched_audio.append(output[0,0].numpy())
             test_loss += loss(output, target_window.double()).mean()
-            print("Morphing audio: " + str(i) + "/" + str(input_data.shape[0]-1))
+            print("Morphing audio: " + str(i+1) + "/" + str(input_data.shape[0]))
     
     test_loss /= input_data.shape[0]
     print('\nTest set: Average loss: {:.4f}'.format(test_loss))
     
     stitched_audio = np.array(stitched_audio)
-    # stitched_audio = np.concatenate(stitched_audio, axis=None)
+
     return stitched_audio  
 
 def main():
@@ -108,7 +107,8 @@ def main():
     
     model = model.double()
 
-    optimizer = optim.SGD(model.parameters(), LEARNING_RATE, momentum=0.9)
+    # optimizer = optim.SGD(model.parameters(), LEARNING_RATE, momentum=0.9)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     if LOAD_MODEL is True:
         model.load_state_dict(torch.load(LOAD_MODEL_PATH, map_location='cpu'))
