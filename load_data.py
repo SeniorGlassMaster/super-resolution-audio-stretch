@@ -93,28 +93,15 @@ def pre_model_s_prepare(input_audio, target_audio, sr):
     # plt.pcolormesh(t, f, np.abs(Zxx))
     # plt.show()
 
-    input_audio = preprocess_input_data(input_audio, WINDOW_SIZE)
-    target_audio = preprocess_target_data(target_audio, WINDOW_SIZE)
+    input_audio = preprocess_input_data_s(input_audio)
     assert input_audio.shape[0] == target_audio.shape[0]
 
     input_s = generate_spectrogram(input_audio, sr)
     target_s = generate_spectrogram(target_audio, sr)
 
+    # Splits each complex number into its own array of the real
+    # and imaginary components
     input_decomp = np.dstack((input_s.real, input_s.imag))
     target_decomp = np.dstack((target_s.real, target_s.imag))
 
-    print(input_s)
-
-    assert False
-    # if i % 100 == 0 or i == data_length - 1:
-    #     progress = 100 * ((i + 1) / data_length)
-    #     if progress != 100:
-    #         progress = str(progress)[:4]
-    #         print('   Generating spectrograms: {}% complete   '.format(progress), end='\r')
-    #     else:
-    #         print('   Generating spectrograms: 100% complete   ')
-    
-    input_audio = np.array(input_s)
-    target_audio = np.array(target_s)
-
-    return input_audio, target_audio
+    return input_decomp, target_decomp

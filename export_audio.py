@@ -2,8 +2,9 @@ from librosa.output import write_wav
 from librosa.util import normalize
 import numpy as np
 from parameters import WINDOW_SIZE, OVERLAP
+import scipy.signal
 
-def render_audio(model_output, path, sample_rate, window_size=WINDOW_SIZE, overlap=OVERLAP):
+def render_audio(model_output, path, sr, window_size=WINDOW_SIZE, overlap=OVERLAP):
     rendered = np.zeros(window_size * model_output.shape[0])
     r_index = 0
     for i in range(model_output.shape[0]):
@@ -17,4 +18,13 @@ def render_audio(model_output, path, sample_rate, window_size=WINDOW_SIZE, overl
         r_index += (window_size - overlap - 1)
     rendered = np.array(rendered)
     rendered = normalize(rendered)
-    write_wav(path, rendered, sample_rate)
+    write_wav(path, rendered, sr)
+
+def render_audio_s(model_output, path, sr):
+    print("Rendering audio from STFT...")
+    # Thank you Eric O Lebigot on https://stackoverflow.com/questions/2598734/numpy-creating-a-complex-array-from-2-real-ones for this one:
+    complexed = np.apply_along_axis(lambda args: complex(*args), 2, model_output)
+    print(complexed)
+    _, inverse = scipy.signal.istft(complexed, fs=sr, nperseg=256, window='hamming')
+    rendered = normalize(inverse)
+    write_wav(path, rendered, sr)

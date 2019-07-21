@@ -38,7 +38,7 @@ def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, lin
         
         if LIVE_GRAPH:
             loss_plot.append(train_loss.sum().item())
-            if i % 100 == 0:
+            if i % 10 == 0:
                 plt.pause(0.00001)
                 line.set_xdata(list(range(len(loss_plot))))
                 line.set_ydata(loss_plot)
@@ -66,7 +66,29 @@ def test_model(model, input_data, target_data):
     
     stitched_audio = np.array(stitched_audio)
     # stitched_audio = np.concatenate(stitched_audio, axis=None)
-    return stitched_audio
+    return stitched_audio  
+
+def test_model_s(model, input_data, target_data):
+    model.eval()
+    loss = nn.MSELoss()
+    test_loss = 0
+    stitched_audio = []
+    with torch.no_grad():
+        for i in range(input_data.shape[0]):
+            input_window = torch.tensor([[input_data[i]]]).to(device)
+            target_window = torch.tensor([[target_data[i]]]).to(device)
+            output = model(input_window.double())
+            output = input_window
+            stitched_audio.append(output[0,0].numpy())
+            test_loss += loss(output, target_window.double()).mean()
+            print("Morphing audio: " + str(i) + "/" + str(input_data.shape[0]-1))
+    
+    test_loss /= input_data.shape[0]
+    print('\nTest set: Average loss: {:.4f}'.format(test_loss))
+    
+    stitched_audio = np.array(stitched_audio)
+    # stitched_audio = np.concatenate(stitched_audio, axis=None)
+    return stitched_audio  
 
 def main():
     print("Loading audio files...")
@@ -116,8 +138,13 @@ def main():
     # target_audio, sr = load("./midi_renders/fugue_2_plucks_slow.wav")
     # input_audio = load_data.preprocess_input_data(input_audio, WINDOW_SIZE)
     # target_audio = load_data.preprocess_target_data(target_audio, WINDOW_SIZE)
-    test_result = test_model(model, input_audio, target_audio)
-    render_audio(test_result, EXPORT_PATH, sr)
+
+    if MODEL != "pre_s":
+        test_result = test_model(model, input_audio, target_audio)
+        render_audio(test_result, EXPORT_PATH, sr)
+    else:
+        test_result = test_model_s(model, input_audio, target_audio)
+        render_audio_s(test_result, EXPORT_PATH, sr)
 
 if __name__ == "__main__":
     main()
