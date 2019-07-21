@@ -9,4 +9,4 @@ I am currently experimenting with different architectures for the neural net and
 - Spectrogram conversion/data handling
 - Spectrogram pre-upscale model
 - Spectrogram post-upscale model
-- SR-GAN using audio spectograms
+- SR-GAN using audio spectrograms

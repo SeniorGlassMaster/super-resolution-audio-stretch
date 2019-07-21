@@ -7,8 +7,11 @@ import matplotlib.pyplot as plt
 import load_data
 from pre_upscale_model import Pre_Upscale_Model
 from post_upscale_model import Post_Upscale_Model
+from pre_upscale_spectrogram_model import Pre_Upscale_Spectrogram_Model
 from parameters import *
 from export_audio import *
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, line, fig):
     model.train()
@@ -17,8 +20,8 @@ def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, lin
     total_loss = 0
     sample_size = input_data.shape[0]
     for i in range(sample_size):
-        input_window = torch.tensor(np.array([[input_data[i]]]))
-        target_window = torch.tensor(np.array([[target_data[i]]]))
+        input_window = torch.tensor(np.array([[input_data[i]]])).to(device)
+        target_window = torch.tensor(np.array([[target_data[i]]])).to(device)
         optimizer.zero_grad()
         output = model(input_window.double())
         train_loss = loss(output, target_window.double())
@@ -52,8 +55,8 @@ def test_model(model, input_data, target_data):
     stitched_audio = []
     with torch.no_grad():
         for i in range(input_data.shape[0]):
-            input_window = torch.tensor([[input_data[i]]])
-            target_window = torch.tensor([[target_data[i]]])
+            input_window = torch.tensor([[input_data[i]]]).to(device)
+            target_window = torch.tensor([[target_data[i]]]).to(device)
             output = model(input_window.double())
             stitched_audio.append(output[0,0].numpy())
             test_loss += loss(output, target_window.double()).mean()
@@ -68,9 +71,8 @@ def test_model(model, input_data, target_data):
 def main():
     print("Loading audio files...")
     input_audio, sr = load("./midi_renders/fugue_1_plucks.wav")
-    target_audio, sr = load("./midi_renders/fugue_1_plucks_slow.wav")
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    target_audio, sr_target = load("./midi_renders/fugue_1_plucks_slow.wav")
+    assert sr == sr_target, "Sample rate of input and target audio not equal."
 
     if MODEL == 'pre':
         input_audio, target_audio = load_data.pre_model_prepare(input_audio, target_audio)
@@ -78,9 +80,10 @@ def main():
     elif MODEL == 'post':
         input_audio, target_audio = load_data.post_model_prepare(input_audio, target_audio)
         model = Post_Upscale_Model().to(device)
+    elif MODEL == 'pre_s':
+        input_audio, target_audio = load_data.pre_model_s_prepare(input_audio, target_audio, sr)
+        model = Pre_Upscale_Spectrogram_Model().to(device)
     
-    input_audio = input_audio.to(device)
-    target_audio = target_audio.to(device)
     model = model.double()
 
     optimizer = optim.SGD(model.parameters(), LEARNING_RATE, momentum=0.9)
@@ -101,7 +104,7 @@ def main():
             plt.ion()
             fig = plt.figure()
             ax = fig.add_subplot(111)
-            line1, = ax.plot(x_plot, loss_plot, 'r-')
+            line1, = ax.plot(x_plot, loss_plot, '-', color='orange', linewidth=1.0)
     
         for epoch in range(1, NUM_EPOCHS + 1):
             train_model(model, input_audio, target_audio, optimizer, epoch, loss_plot, line1, fig)
