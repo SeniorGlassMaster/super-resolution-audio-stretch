@@ -25,6 +25,6 @@ def render_audio_s(model_output, path, sr):
     # Thank you Eric O Lebigot on https://stackoverflow.com/questions/2598734/numpy-creating-a-complex-array-from-2-real-ones for this one:
     complexed = np.apply_along_axis(lambda args: complex(*args), 2, model_output)
     print(complexed)
-    _, inverse = scipy.signal.istft(complexed, fs=sr, nperseg=256, window='hann')
+    _, inverse = scipy.signal.istft(complexed.T, fs=sr, nperseg=1024, window='hann')
     rendered = normalize(inverse)
     write_wav(path, rendered, sr)

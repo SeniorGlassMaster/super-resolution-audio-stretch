@@ -80,7 +80,10 @@ def test_model_s(model, input_data, target_data):
             output = model(input_window.double())
             stitched_audio.append(output[0,0].numpy())
             test_loss += loss(output, target_window.double()).mean()
-            print("Morphing audio: " + str(i+1) + "/" + str(input_data.shape[0]))
+            if (i+1) != input_data.shape[0]:
+                print('Morphing audio: {}/{}     '.format(str(i+1), str(input_data.shape[0])), end='\r')
+            else: 
+                print('Morphing audio: {}/{}     '.format(str(i+1), str(input_data.shape[0])), end='\n')
     
     test_loss /= input_data.shape[0]
     print('\nTest set: Average loss: {:.4f}'.format(test_loss))
