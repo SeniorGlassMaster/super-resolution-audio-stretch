@@ -6,7 +6,7 @@ Training data consists of MIDI files rendered by a string emulation synthesizer.
 I am currently experimenting with different architectures for the neural net and will update this README when I've achieved better results.
 
 ### TO-DO:
-- Spectrogram conversion/data handling
-- Spectrogram pre-upscale model
+~~- Spectrogram conversion/data handling~~
+~~- Spectrogram pre-upscale model~~
 - Spectrogram post-upscale model
 - SR-GAN using audio spectrograms
