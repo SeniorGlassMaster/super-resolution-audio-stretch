@@ -13,4 +13,4 @@ LEARNING_RATE = 1e-4
 
 MODEL_NAME = "pre_s_model_0"
 SAVE_PATH = "./model_saves/" + MODEL_NAME
-EXPORT_PATH = "./output/" + MODEL_NAME + ".wav"\
+EXPORT_PATH = "./output/" + MODEL_NAME + ".wav"
