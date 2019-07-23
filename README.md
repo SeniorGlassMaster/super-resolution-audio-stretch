@@ -7,6 +7,8 @@ I am currently experimenting with different architectures for the neural net and
 
 ### TO-DO:
 ~~- Spectrogram conversion/data handling~~
+
 ~~- Spectrogram pre-upscale model~~
+
 - Spectrogram post-upscale model
 - SR-GAN using audio spectrograms
