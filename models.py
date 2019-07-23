@@ -85,3 +85,12 @@ class Pre_Upscale_Spectrogram_Model(nn.Module):
         out = self.lin3(out)
         return out
 
+class SRGAN_Model(nn.Module):
+
+    def __init__(self):
+        super(SRGAN_Model, self).__init__()
+        self.lin1 = nn.linear(2,64)
+    
+    def forward(self, x):
+        out = self.lin1(x)
+        return out

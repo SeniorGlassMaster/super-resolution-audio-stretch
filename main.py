@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
 import numpy as np
 from librosa.core import load
 import matplotlib.pyplot as plt
@@ -24,7 +25,7 @@ def main():
     elif MODEL == 'pre_s':
         input_audio, target_audio = load_data.pre_model_s_prepare(input_audio, target_audio, sr)
         model = Pre_Upscale_Spectrogram_Model().to(device)
-    
+
     model = model.double()
 
     # optimizer = optim.SGD(model.parameters(), LEARNING_RATE, momentum=0.9)
@@ -35,7 +36,7 @@ def main():
         model.eval()
     else:
         print("Training model...")
-        
+
         loss_plot = None
         line1 = None
         fig = None
@@ -47,7 +48,7 @@ def main():
             fig = plt.figure()
             ax = fig.add_subplot(111)
             line1, = ax.plot(x_plot, loss_plot, '-', color='orange', linewidth=1.0)
-    
+
         for epoch in range(1, NUM_EPOCHS + 1):
             train_model(model, input_audio, target_audio, optimizer, epoch, loss_plot, line1, fig)
             cur_save_path = SAVE_PATH + "_e" + str(epoch) + ".pth"
@@ -69,6 +70,7 @@ def main():
 def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, line, fig):
     model.train()
     loss = nn.MSELoss()
+    # loss = nn.CTCLoss()
     # loss = nn.L1Loss()
     total_loss = 0
     sample_size = input_data.shape[0]
@@ -77,7 +79,8 @@ def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, lin
         target_window = torch.tensor(np.array([[target_data[i]]])).to(device)
         optimizer.zero_grad()
         output = model(input_window.double())
-        train_loss = loss(output, target_window.double())
+        # train_loss = loss(output, target_window.double())
+        train_loss = F.mse_loss(output, target_window.double())
         train_loss.backward()
         total_loss += train_loss.sum()
 
@@ -88,7 +91,7 @@ def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, lin
             print('   Epoch {}: {}% complete   '.format(epoch, progress_str), end='\r')
         elif progress == 100:
             print('   Epoch {}: 100% complete   '.format(epoch))
-        
+
         if LIVE_GRAPH:
             loss_plot.append(train_loss.sum().item())
             if i % 10 == 0:
@@ -113,13 +116,13 @@ def test_model(model, input_data, target_data):
             output = model(input_window.double())
             stitched_audio.append(output[0,0].numpy())
             test_loss += loss(output, target_window.double()).mean()
-    
+
     test_loss /= input_data.shape[0]
     print('\nTest set: Average loss: {:.4f}'.format(test_loss))
-    
+
     stitched_audio = np.array(stitched_audio)
     # stitched_audio = np.concatenate(stitched_audio, axis=None)
-    return stitched_audio  
+    return stitched_audio
 
 def test_model_s(model, input_data, target_data):
     model.eval()
@@ -135,12 +138,12 @@ def test_model_s(model, input_data, target_data):
             test_loss += loss(output, target_window.double()).mean()
             if (i+1) != input_data.shape[0]:
                 print('Morphing audio: {}/{}     '.format(str(i+1), str(input_data.shape[0])), end='\r')
-            else: 
+            else:
                 print('Morphing audio: {}/{}     '.format(str(i+1), str(input_data.shape[0])), end='\n')
 
     test_loss /= input_data.shape[0]
     print('\nTest set: Average loss: {:.4f}'.format(test_loss))
-    
+
     stitched_audio = np.array(stitched_audio)
 
     return stitched_audio
@@ -148,4 +151,4 @@ def test_model_s(model, input_data, target_data):
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     main()
-
+    
