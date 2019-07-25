@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 import numpy as np
 from librosa.core import load
 import matplotlib.pyplot as plt
@@ -50,7 +49,11 @@ def main():
             line1, = ax.plot(x_plot, loss_plot, '-', color='orange', linewidth=1.0)
 
         for epoch in range(1, NUM_EPOCHS + 1):
-            train_model(model, input_audio, target_audio, optimizer, epoch, loss_plot, line1, fig)
+            if MODEL != "pre_s":
+                train_model(model, input_audio, target_audio, optimizer, epoch, loss_plot, line1, fig)
+            else:
+                train_model_s(model, input_audio, target_audio, optimizer, epoch, loss_plot, line1, fig)
+            
             cur_save_path = SAVE_PATH + "_e" + str(epoch) + ".pth"
             torch.save(model.state_dict(), cur_save_path)
             print("   Saved model to " + cur_save_path)
@@ -74,13 +77,15 @@ def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, lin
     # loss = nn.L1Loss()
     total_loss = 0
     sample_size = input_data.shape[0]
+    input_data = input_data * 1e4
+    target_data = target_data * 1e4
     for i in range(sample_size):
         input_window = torch.tensor(np.array([[input_data[i]]])).to(device)
         target_window = torch.tensor(np.array([[target_data[i]]])).to(device)
         optimizer.zero_grad()
         output = model(input_window.double())
         # train_loss = loss(output, target_window.double())
-        train_loss = F.mse_loss(output, target_window.double())
+        train_loss = loss(output, target_window.double())
         train_loss.backward()
         total_loss += train_loss.sum()
 
@@ -95,10 +100,11 @@ def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, lin
         if LIVE_GRAPH:
             loss_plot.append(train_loss.sum().item())
             if i % 10 == 0:
-                plt.pause(0.00001)
+                fig.canvas.start_event_loop(0.0001)
                 line.set_xdata(list(range(len(loss_plot))))
                 line.set_ydata(loss_plot)
-                plt.axis([0,len(loss_plot),0,max(loss_plot)])
+                plt.axis([0,len(loss_plot),1e-5,max(loss_plot)])
+                plt.yscale("log")
                 fig.canvas.draw()
                 fig.canvas.flush_events()
 
@@ -130,12 +136,15 @@ def test_model_s(model, input_data, target_data):
     test_loss = 0
     stitched_audio = []
     with torch.no_grad():
-        for i in range(input_data.shape[0]):
-            input_window = torch.tensor([[input_data[i]]]).to(device)
-            target_window = torch.tensor([[target_data[i]]]).to(device)
+        input_data = input_data * 1e4
+        target_data = target_data * 1e4
+        for i in range((input_data.shape[0] / 4)-1):
+            input_window = torch.tensor([[input_data[i:i+4]]]).to(device)
+            target_window = torch.tensor([[target_data[i:i+4]]]).to(device)
             output = model(input_window.double())
-            stitched_audio.append(output[0,0].numpy())
             test_loss += loss(output, target_window.double()).mean()
+            output = output / 1e4
+            stitched_audio.append(output[0,0].numpy())
             if (i+1) != input_data.shape[0]:
                 print('Morphing audio: {}/{}     '.format(str(i+1), str(input_data.shape[0])), end='\r')
             else:
@@ -148,7 +157,46 @@ def test_model_s(model, input_data, target_data):
 
     return stitched_audio
 
+def train_model_s(model, input_data, target_data, optimizer, epoch, loss_plot, line, fig):
+    model.train()
+    loss = nn.MSELoss()
+    # loss = nn.CTCLoss()
+    # loss = nn.L1Loss()
+    total_loss = 0
+    sample_size = input_data.shape[0]
+    input_data = input_data * 1e4
+    target_data = target_data * 1e4
+    for i in range(int(sample_size / 4)-1):
+        input_window = torch.tensor(np.array([[input_data[i:i+4]]])).to(device)
+        target_window = torch.tensor(np.array([[target_data[i:i+4]]])).to(device)
+        optimizer.zero_grad()
+        output = model(input_window.double())
+        # train_loss = loss(output, target_window.double())
+        train_loss = loss(output, target_window.double())
+        train_loss.backward()
+        total_loss += train_loss.sum()
+
+        optimizer.step()
+        progress = 100 * ((i + 1) / (sample_size/4))
+        if progress != 100 and (int(progress * 10) % 7) == 0:
+            progress_str = str(progress)[:4]
+            print('   Epoch {}: {}% complete   '.format(epoch, progress_str), end='\r')
+        elif progress == 100:
+            print('   Epoch {}: 100% complete   '.format(epoch))
+
+        if LIVE_GRAPH:
+            loss_plot.append(train_loss.sum().item())
+            if i % 10 == 0:
+                fig.canvas.start_event_loop(0.0001)
+                line.set_xdata(list(range(len(loss_plot))))
+                line.set_ydata(loss_plot)
+                plt.axis([0,len(loss_plot),1e-5,max(loss_plot)])
+                plt.yscale("log")
+                fig.canvas.draw()
+                fig.canvas.flush_events()
+
+    print('   Train Epoch: {} \tLoss: {:.6f}'.format(epoch, total_loss))
+
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     main()
-    
