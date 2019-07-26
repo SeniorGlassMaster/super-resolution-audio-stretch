@@ -22,8 +22,18 @@ def render_audio(model_output, path, sr, window_size=WINDOW_SIZE, overlap=OVERLA
 
 def render_audio_s(model_output, path, sr):
     print("Rendering audio from STFT...")
+
+    complexed = []
+    for i in range(model_output.shape[0]):
+        for j in range(model_output.shape[2]):
+            complexed_frame = []
+            for k in range(model_output.shape[3]):
+                complexed_frame.append(np.complex(model_output[i, 0, j, k], model_output[i, 1, j, k]))
+            complexed.append(complexed_frame)
+    complexed = np.array(complexed)
+
     # Thank you Eric O Lebigot on https://stackoverflow.com/questions/2598734/numpy-creating-a-complex-array-from-2-real-ones for this one:
-    complexed = np.apply_along_axis(lambda args: complex(*args), 2, model_output)
-    _, inverse = scipy.signal.istft(complexed.T, fs=sr, nperseg=1024, window='hann')
+    # complexed = np.apply_along_axis(lambda args: complex(*args), 2, model_output)
+    _, inverse = scipy.signal.istft(complexed.T, fs=sr, nperseg=NPERSEG, window='hann')
     rendered = normalize(inverse)
     write_wav(path, rendered, sr)

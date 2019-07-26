@@ -76,7 +76,7 @@ def window_splitter(src, window_size=WINDOW_SIZE, overlap=OVERLAP):
     return np.array(window_split)
 
 def generate_spectrogram(src, sr):
-    return scipy.signal.stft(src, fs=sr, nperseg=1024, window='hann')[2].T
+    return scipy.signal.stft(src, fs=sr, nperseg=NPERSEG, window='hann')[2].T
 
 def pre_model_prepare(input_audio, target_audio):
     input_audio = preprocess_input_data(input_audio, WINDOW_SIZE)
@@ -90,13 +90,6 @@ def post_model_prepare(input_audio, target_audio):
     return input_audio, target_audio
 
 def pre_model_s_prepare(input_audio, target_audio, sr):
-    # f, t, Zxx = scipy.signal.stft(input_audio, fs=sr, window='hann')
-    # plt.pcolormesh(t, f, np.abs(Zxx))
-    # plt.show()
-    # f, t, Zxx = scipy.signal.stft(target_audio, fs=sr, window='hann')
-    # plt.pcolormesh(t, f, np.abs(Zxx))
-    # plt.show()
-
     input_audio = preprocess_input_data_s(input_audio)
     assert input_audio.shape[0] == target_audio.shape[0]
 
@@ -123,9 +116,6 @@ def pre_model_s_prepare(input_audio, target_audio, sr):
 
     input_tensor = np.array(input_tensor)
     target_tensor = np.array(target_tensor)
-
-    # print(input_tensor.shape)
-    # print(target_tensor.shape)
 
     input_tensor = torch.tensor(input_tensor, dtype=torch.double)
     target_tensor = torch.tensor(target_tensor, dtype=torch.double)

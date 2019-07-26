@@ -2,13 +2,18 @@ MODEL = 'pre_s'
 # MODEL = 'post'
 
 LOAD_MODEL = False
-LOAD_MODEL_PATH = "./model_saves/pre_s_model_0_e5.pth"
+LOAD_MODEL_PATH = "./model_saves/pre_s_model_0_e10.pth"
 
-LIVE_GRAPH = False
+LIVE_GRAPH = True
 
+# Non-spectrogram settings:
 WINDOW_SIZE = 1000
 OVERLAP = 50
-NUM_EPOCHS = 10
+
+# Spectrogram settings:
+NPERSEG = 2048
+
+NUM_EPOCHS = 20
 LEARNING_RATE = 1e-4
 
 MODEL_NAME = "pre_s_model_0"

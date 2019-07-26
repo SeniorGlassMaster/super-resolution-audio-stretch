@@ -62,8 +62,8 @@ def main():
         test_result = test_model(model, input_audio, target_audio)
         render_audio(test_result, EXPORT_PATH, sr)
     else:
-        test_result = test_model(model, input_data, target_data)
-        render_audio_s(test_result, EXPORT_PATH, sr)
+        test_result = test_model_s(model, input_data, target_data)
+        render_audio_s(test_result.numpy(), EXPORT_PATH, sr)
 
 def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, line, fig):
     model.train()
@@ -125,16 +125,6 @@ def test_model(model, input_data, target_data):
     # stitched_audio = np.concatenate(stitched_audio, axis=None)
     return stitched_audio
 
-def test_model_s(model, input_data, target_data):
-    model.eval()
-    loss = nn.MSELoss()
-    with torch.no_grad():
-        output = model(input_data.double())
-        test_loss = loss(output, target_data.double()).sum()
-
-    print('\nTest set --- loss sum: {:.4f}'.format(test_loss))
-    return output
-
 def train_model_s(model, input_data, target_data, optimizer):
     model.train()
     loss = nn.MSELoss()
@@ -172,12 +162,22 @@ def train_model_s(model, input_data, target_data, optimizer):
             fig.canvas.start_event_loop(0.0001)
             line.set_xdata(list(range(len(loss_plot))))
             line.set_ydata(loss_plot)
-            plt.axis([0,len(loss_plot),1e-5,max(loss_plot)])
-            plt.yscale("log")
+            plt.axis([0,len(loss_plot),0,max(loss_plot)])
+            # plt.yscale("log")
             fig.canvas.draw()
             fig.canvas.flush_events()
 
         print('   Train Epoch: {} \tLoss: {:.6f}'.format(epoch, train_loss.sum()))
+
+def test_model_s(model, input_data, target_data):
+    model.eval()
+    loss = nn.MSELoss()
+    with torch.no_grad():
+        output = model(input_data.double())
+        test_loss = loss(output, target_data.double()).sum()
+
+    print('\nTest set --- loss sum: {:.4f}'.format(test_loss))
+    return output
 
 if __name__ == "__main__":
     main()
