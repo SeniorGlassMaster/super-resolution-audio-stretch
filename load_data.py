@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import torch
 import scipy.signal
 import matplotlib.pyplot as plt
 from parameters import WINDOW_SIZE, OVERLAP
@@ -101,10 +102,32 @@ def pre_model_s_prepare(input_audio, target_audio, sr):
 
     input_s = generate_spectrogram(input_audio, sr)
     target_s = generate_spectrogram(target_audio, sr)
+    assert input_s.shape[0] == target_s.shape[0], "Dimension 0 of generated spectrograms do not match"
+    assert input_s.shape[1] == target_s.shape[1], "Dimension 1 of generated spectrograms do not match"
 
-    # Splits each complex number into its own array of the real
-    # and imaginary components
-    input_decomp = np.dstack((input_s.real, input_s.imag))
-    target_decomp = np.dstack((target_s.real, target_s.imag))
+    input_tensor = []
+    target_tensor = []
+    i = 0
+    while i < (input_s.shape[0] - 10):
+        input_tensor.append([input_s[i:i+10].real, input_s[i:i+10].imag])
+        target_tensor.append([target_s[i:i+10].real, target_s[i:i+10].imag])
+        i += 10
 
-    return input_decomp, target_decomp
+    end_pad = np.zeros((input_s.shape[0] - i, input_s.shape[1]))
+    temp_input_r = np.append(input_s[i:].real, end_pad, axis=0)
+    temp_input_i = np.append(input_s[i:].imag, end_pad, axis=0)
+    temp_target_r = np.append(target_s[i:].real, end_pad, axis=0)
+    temp_target_i = np.append(target_s[i:].imag, end_pad, axis=0)
+    input_tensor.append([temp_input_r, temp_input_i])
+    target_tensor.append([temp_target_r, temp_target_i])
+
+    input_tensor = np.array(input_tensor)
+    target_tensor = np.array(target_tensor)
+
+    # print(input_tensor.shape)
+    # print(target_tensor.shape)
+
+    input_tensor = torch.tensor(input_tensor, dtype=torch.double)
+    target_tensor = torch.tensor(target_tensor, dtype=torch.double)
+
+    return input_tensor, target_tensor

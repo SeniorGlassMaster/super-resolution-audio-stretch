@@ -58,15 +58,15 @@ class Pre_Upscale_Spectrogram_Model(nn.Module):
 
     def __init__(self):
         super(Pre_Upscale_Spectrogram_Model, self).__init__()
-        self.pad1 = nn.ZeroPad2d((1,1,0,0))
-        self.conv1 = nn.Conv2d(1,64,(1,3))
+        self.pad1 = nn.ZeroPad2d((4,4,1,1))
+        self.conv1 = nn.Conv2d(2,64,(3,9))
         self.rel1 = nn.ReLU()
         # # self.rel1 = nn.Sigmoid()
         self.conv2 = nn.Conv2d(64,32,1)
         self.rel2 = nn.ReLU()
         # # self.rel2 = nn.Sigmoid()
-        self.pad2 = nn.ZeroPad2d((1,1,0,0))
-        self.conv3 = nn.Conv2d(32,1,(1,3))
+        self.pad2 = nn.ZeroPad2d((2,2,1,1))
+        self.conv3 = nn.Conv2d(32,2,(3,5))
 
     def forward(self, x):
         # print(x.shape)
