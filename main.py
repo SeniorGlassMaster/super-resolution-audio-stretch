@@ -62,7 +62,7 @@ def main():
         test_result = test_model(model, input_audio, target_audio)
         render_audio(test_result, EXPORT_PATH, sr)
     else:
-        test_result = test_model_s(model, input_data, target_data)
+        test_result = test_model_s(model, torch.cat(input_data), torch.cat(target_data))
         render_audio_s(test_result.numpy(), EXPORT_PATH, sr)
 
 def train_model(model, input_data, target_data, optimizer, epoch, loss_plot, line, fig):
@@ -138,39 +138,46 @@ def train_model_s(model, input_data, target_data, optimizer):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         line, = ax.plot(x_plot, loss_plot, '-', color='orange', linewidth=1.0)
+        plt.xlabel("Batch number")
+        plt.ylabel("MSE Loss")
+        # plt.yscale("log")
 
     for epoch in range(1, NUM_EPOCHS + 1):
-        optimizer.zero_grad()
-        output = model(input_data)
-        train_loss = loss(output, target_data)
-        train_loss.backward()
-        optimizer.step()
+        epoch_loss = 0
+        for i, input_batch in enumerate(input_data):
+            input_batch = input_batch.to(device)
+            target_batch = target_data[i].to(device)
 
-        # progress = 100 * ((i + 1) / sample_size)
-        # if progress != 100 and (int(progress * 10) % 7) == 0:
-        #     progress_str = str(progress)[:4]
-        #     print('   Epoch {}: {}% complete   '.format(epoch, progress_str), end='\r')
-        # elif progress == 100:
-        #     print('   Epoch {}: 100% complete   '.format(epoch))
-            
+            optimizer.zero_grad()
+            output = model(input_batch)
+            train_loss = loss(output, target_batch)
+            train_loss.backward()
+            optimizer.step()
+
+            if (i+1) != len(input_data):
+                print('   Epoch {}: {}/{} batches complete   '.format(epoch, i+1, len(input_data)), end='\r')
+            else:
+                print('   Epoch {}: {}/{} batches complete   '.format(epoch, i+1, len(input_data)))
+
+            if LIVE_GRAPH:
+                loss_plot.append(train_loss.sum().item())
+                fig.canvas.start_event_loop(0.0001)
+                line.set_xdata(list(range(len(loss_plot))))
+                line.set_ydata(loss_plot)
+                plt.axis([0,len(loss_plot),0,max(loss_plot)])
+                fig.canvas.draw()
+                fig.canvas.flush_events()
+
         cur_save_path = SAVE_PATH + "_e" + str(epoch) + ".pth"
         torch.save(model.state_dict(), cur_save_path)
         print("   Saved model to " + cur_save_path)
-
-        if LIVE_GRAPH:
-            loss_plot.append(train_loss.sum().item())
-            fig.canvas.start_event_loop(0.0001)
-            line.set_xdata(list(range(len(loss_plot))))
-            line.set_ydata(loss_plot)
-            plt.axis([0,len(loss_plot),0,max(loss_plot)])
-            # plt.yscale("log")
-            fig.canvas.draw()
-            fig.canvas.flush_events()
-
-        print('   Train Epoch: {} \tLoss: {:.6f}'.format(epoch, train_loss.sum()))
+        print('   ======== Epoch: {} \tLoss: {:.6f} ========'.format(epoch, train_loss.sum()))
 
 def test_model_s(model, input_data, target_data):
     model.eval()
+    input_data = input_data.to(device)
+    target_data = target_data.to(device)
+
     loss = nn.MSELoss()
     with torch.no_grad():
         output = model(input_data.double())

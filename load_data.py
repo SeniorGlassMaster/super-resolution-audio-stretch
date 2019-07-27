@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import scipy.signal
 import matplotlib.pyplot as plt
-from parameters import WINDOW_SIZE, OVERLAP
+from parameters import WINDOW_SIZE, OVERLAP, NPERSEG
 
 # Takes input mono audio track, stretches it to twice its length (interpolating
 # samples through average of adjacent samples), and splits into arrays of
@@ -98,26 +98,44 @@ def pre_model_s_prepare(input_audio, target_audio, sr):
     assert input_s.shape[0] == target_s.shape[0], "Dimension 0 of generated spectrograms do not match"
     assert input_s.shape[1] == target_s.shape[1], "Dimension 1 of generated spectrograms do not match"
 
-    input_tensor = []
-    target_tensor = []
+
+    for i, frame in enumerate(input_s):
+        for j, freq_bin in enumerate(frame):
+            if not isinstance(freq_bin.real, np.float64):
+                print(freq_bin)
+            if not isinstance(freq_bin.imag, np.float64):
+                print(freq_bin)
+
+
+    input_formatted = []
+    target_formatted = []
     i = 0
     while i < (input_s.shape[0] - 10):
-        input_tensor.append([input_s[i:i+10].real, input_s[i:i+10].imag])
-        target_tensor.append([target_s[i:i+10].real, target_s[i:i+10].imag])
+        input_formatted.append([input_s[i:i+10].real, input_s[i:i+10].imag])
+        target_formatted.append([target_s[i:i+10].real, target_s[i:i+10].imag])
         i += 10
 
-    end_pad = np.zeros((input_s.shape[0] - i, input_s.shape[1]))
+    end_pad = np.zeros((10 - (input_s.shape[0] - i), input_s.shape[1]))
     temp_input_r = np.append(input_s[i:].real, end_pad, axis=0)
     temp_input_i = np.append(input_s[i:].imag, end_pad, axis=0)
     temp_target_r = np.append(target_s[i:].real, end_pad, axis=0)
     temp_target_i = np.append(target_s[i:].imag, end_pad, axis=0)
-    input_tensor.append([temp_input_r, temp_input_i])
-    target_tensor.append([temp_target_r, temp_target_i])
+    input_formatted.append([temp_input_r, temp_input_i])
+    target_formatted.append([temp_target_r, temp_target_i])
 
-    input_tensor = np.array(input_tensor)
-    target_tensor = np.array(target_tensor)
+    input_formatted = np.array(input_formatted, dtype=np.float)
+    target_formatted = np.array(target_formatted, dtype=np.float)
 
-    input_tensor = torch.tensor(input_tensor, dtype=torch.double)
-    target_tensor = torch.tensor(target_tensor, dtype=torch.double)
+    input_batches = np.array_split(input_formatted, 20)
+    target_batches = np.array_split(target_formatted, 20)
 
-    return input_tensor, target_tensor
+    for i, batch in enumerate(input_batches):
+        if (batch.shape != target_batches[i].shape):
+            print("Input batch: " + str(i) + " \tShape: " + str(batch.shape))
+            print("Target batch: " + str(i) + " \tShape: " + str(target_batches[i].shape))
+
+    for i in range(len(input_batches)):
+        input_batches[i] = torch.tensor(input_batches[i], dtype=torch.double)
+        target_batches[i] = torch.tensor(target_batches[i], dtype=torch.double)
+    
+    return input_batches, target_batches
