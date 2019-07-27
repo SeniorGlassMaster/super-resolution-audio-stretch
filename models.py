@@ -58,15 +58,16 @@ class Pre_Upscale_Spectrogram_Model(nn.Module):
 
     def __init__(self):
         super(Pre_Upscale_Spectrogram_Model, self).__init__()
-        self.pad1 = nn.ZeroPad2d((4,4,1,1))
-        self.conv1 = nn.Conv2d(2,64,(3,9))
+        self.pad1 = nn.ReflectionPad2d((1,1,0,0))
+        self.conv1 = nn.Conv2d(2,128,(1,3))
         self.rel1 = nn.ReLU()
-        # # self.rel1 = nn.Sigmoid()
-        self.conv2 = nn.Conv2d(64,32,1)
+        self.conv2 = nn.Conv2d(128,64,1)
         self.rel2 = nn.ReLU()
-        # # self.rel2 = nn.Sigmoid()
-        self.pad2 = nn.ZeroPad2d((2,2,1,1))
-        self.conv3 = nn.Conv2d(32,2,(3,5))
+        self.pad2 = nn.ReflectionPad2d((1,1,0,0))
+        self.conv3 = nn.Conv2d(64,32,(1,3))
+        self.rel3 = nn.ReLU()
+        self.pad3 = nn.ReflectionPad2d((1,1,0,0))
+        self.conv4 = nn.Conv2d(32,2,(1,3))
 
     def forward(self, x):
         # print(x.shape)
@@ -77,6 +78,8 @@ class Pre_Upscale_Spectrogram_Model(nn.Module):
         out = self.rel2(out)
         out = self.pad2(out)
         out = self.conv3(out)
+        out = self.pad3(out)
+        out = self.conv4(out)
         return out
 
 class SRGAN_Model(nn.Module):

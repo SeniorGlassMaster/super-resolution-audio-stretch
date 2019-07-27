@@ -127,7 +127,9 @@ def test_model(model, input_data, target_data):
 
 def train_model_s(model, input_data, target_data, optimizer):
     model.train()
-    loss = nn.MSELoss()
+    loss = nn.SmoothL1Loss()
+    # loss = nn.KLDivLoss()
+    # loss = nn.MSELoss()
     # loss = nn.CTCLoss()
     # loss = nn.L1Loss()
 
