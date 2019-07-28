@@ -58,6 +58,8 @@ def main():
         else:
             train_model_s(model, input_data, target_data, optimizer)
 
+    assert False
+    
     if MODEL != 'pre_s':
         test_result = test_model(model, input_audio, target_audio)
         render_audio(test_result, EXPORT_PATH, sr)
@@ -177,9 +179,9 @@ def train_model_s(model, input_data, target_data, optimizer):
         ######################################################################
         ######### Debugging ##################################################
         ######################################################################
-        render_audio_s(model(torch.cat(input_data)).detach().numpy(), 
-                       "./output/intermediates/output_" + str(epoch) + ".wav", 
-                       22050)
+        # render_audio_s(model(torch.cat(input_data)).detach().numpy(), 
+        #                "./output/intermediates/output_" + str(epoch) + ".wav", 
+        #                22050)
         ######################################################################
         ######################################################################
         ######################################################################
