@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import scipy.signal
 import matplotlib.pyplot as plt
-from parameters import WINDOW_SIZE, OVERLAP, NPERSEG, BATCHES_PER_EPOCH
+from parameters import WINDOW_SIZE, OVERLAP, NPERSEG, BATCHES_PER_EPOCH, FRAMES_PER_BATCH
 
 # Takes input mono audio track, stretches it to twice its length (interpolating
 # samples through average of adjacent samples), and splits into arrays of
@@ -110,12 +110,12 @@ def pre_model_s_prepare(input_audio, target_audio, sr):
     input_formatted = []
     target_formatted = []
     i = 0
-    while i < (input_s.shape[0] - 10):
-        input_formatted.append([input_s[i:i+10].real, input_s[i:i+10].imag])
-        target_formatted.append([target_s[i:i+10].real, target_s[i:i+10].imag])
-        i += 10
+    while i < (input_s.shape[0] - FRAMES_PER_BATCH):
+        input_formatted.append([input_s[i:i+FRAMES_PER_BATCH].real, input_s[i:i+FRAMES_PER_BATCH].imag])
+        target_formatted.append([target_s[i:i+FRAMES_PER_BATCH].real, target_s[i:i+FRAMES_PER_BATCH].imag])
+        i += FRAMES_PER_BATCH
 
-    end_pad = np.zeros((10 - (input_s.shape[0] - i), input_s.shape[1]))
+    end_pad = np.zeros((FRAMES_PER_BATCH - (input_s.shape[0] - i), input_s.shape[1]))
     temp_input_r = np.append(input_s[i:].real, end_pad, axis=0)
     temp_input_i = np.append(input_s[i:].imag, end_pad, axis=0)
     temp_target_r = np.append(target_s[i:].real, end_pad, axis=0)
