@@ -1,8 +1,8 @@
 MODEL = 'pre_s'
 # MODEL = 'post'
 
-LOAD_MODEL = False
-LOAD_MODEL_PATH = "./model_saves/pre_s_model_0_e999.pth"
+LOAD_MODEL = True
+LOAD_MODEL_PATH = "./model_saves/pre_s_model_0_e1000.pth"
 
 LIVE_GRAPH = False
 
@@ -11,7 +11,7 @@ WINDOW_SIZE = 1000
 OVERLAP = 50
 
 # Spectrogram settings:
-NPERSEG = 512
+NPERSEG = 1024
 BATCHES_PER_EPOCH = 100
 FRAMES_PER_BATCH = 3
 
