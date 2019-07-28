@@ -76,7 +76,7 @@ def window_splitter(src, window_size=WINDOW_SIZE, overlap=OVERLAP):
     return np.array(window_split)
 
 def generate_spectrogram(src, sr):
-    return scipy.signal.stft(src, fs=sr, nperseg=NPERSEG, window='hann')[2]
+    return scipy.signal.stft(src, fs=sr, nperseg=NPERSEG, window='hann')[2].T
 
 def pre_model_prepare(input_audio, target_audio):
     input_audio = preprocess_input_data(input_audio, WINDOW_SIZE)
@@ -126,8 +126,8 @@ def pre_model_s_prepare(input_audio, target_audio, sr):
     input_formatted = np.array(input_formatted, dtype=np.float)
     target_formatted = np.array(target_formatted, dtype=np.float)
 
-    input_formatted = np.log10((1 + input_formatted) * 1e8)
-    target_formatted = np.log10((1 + target_formatted) * 1e8)
+    input_formatted = input_formatted * 1e4
+    target_formatted = target_formatted * 1e4
 
     input_batches = np.array_split(input_formatted, BATCHES_PER_EPOCH)
     target_batches = np.array_split(target_formatted, BATCHES_PER_EPOCH)

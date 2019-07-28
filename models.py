@@ -58,28 +58,50 @@ class Pre_Upscale_Spectrogram_Model(nn.Module):
 
     def __init__(self):
         super(Pre_Upscale_Spectrogram_Model, self).__init__()
-        self.pad1 = nn.ReflectionPad2d((1,1,0,0))
-        self.conv1 = nn.Conv2d(2,128,(1,3))
+        self.conv1 = nn.Conv2d(2,64,(1,1))
         self.rel1 = nn.ReLU()
-        self.conv2 = nn.Conv2d(128,64,1)
-        self.rel2 = nn.ReLU()
-        self.pad2 = nn.ReflectionPad2d((1,1,0,0))
-        self.conv3 = nn.Conv2d(64,32,(1,3))
-        self.rel3 = nn.ReLU()
-        self.pad3 = nn.ReflectionPad2d((1,1,0,0))
-        self.conv4 = nn.Conv2d(32,2,(1,3))
 
-    def forward(self, x):
-        # print(x.shape)
-        out = self.pad1(x)
-        out = self.conv1(out)
+        self.pad2 = nn.ReflectionPad2d((1,1,1,1))
+        self.conv2 = nn.Conv2d(64,32,(3,3))
+        self.rel2 = nn.ReLU()
+
+        self.pad3 = nn.ReflectionPad2d((1,1,1,1))
+        self.conv3 = nn.Conv2d(32,16,(3,3))
+        self.rel3 = nn.ReLU()
+
+        self.pad4 = nn.ReflectionPad2d((1,1,1,1))
+        self.conv4 = nn.Conv2d(16,8,(3,3))
+        self.rel4 = nn.ReLU()
+
+        self.pad5 = nn.ReflectionPad2d((1,1,1,1))
+        self.conv5 = nn.Conv2d(8,4,(3,3))
+        self.rel5 = nn.ReLU()
+
+        self.pad6 = nn.ReflectionPad2d((1,1,1,1))
+        self.conv6 = nn.Conv2d(4,2,(3,3))
+
+    def forward(self, input):
+        out = self.conv1(input)
         out = self.rel1(out)
+
+        out = self.pad2(out)
         out = self.conv2(out)
         out = self.rel2(out)
-        out = self.pad2(out)
-        out = self.conv3(out)
+
         out = self.pad3(out)
+        out = self.conv3(out)
+        out = self.rel3(out)
+
+        out = self.pad4(out)
         out = self.conv4(out)
+        out = self.rel4(out)
+
+        out = self.pad5(out)
+        out = self.conv5(out)
+        out = self.rel5(out)
+
+        out = self.pad6(out)
+        out = self.conv6(out)
         return out
 
 class SRGAN_Model(nn.Module):

@@ -160,6 +160,8 @@ def train_model_s(model, input_data, target_data, optimizer):
                 print('   Epoch {}: {}/{} batches complete   '.format(epoch, i+1, len(input_data)), end='\r')
             else:
                 print('   Epoch {}: {}/{} batches complete   '.format(epoch, i+1, len(input_data)))
+            
+            epoch_loss += train_loss.sum().item()
 
             if LIVE_GRAPH:
                 loss_plot.append(train_loss.sum().item())
@@ -169,11 +171,23 @@ def train_model_s(model, input_data, target_data, optimizer):
                 plt.axis([0,len(loss_plot),0,max(loss_plot)])
                 fig.canvas.draw()
                 fig.canvas.flush_events()
+                if i+1 == len(input_data):
+                    plt.savefig("./lossplot.png")
+
+        ######################################################################
+        ######### Debugging ##################################################
+        ######################################################################
+        render_audio_s(model(torch.cat(input_data)).detach().numpy(), 
+                       "./output/intermediates/output_" + str(epoch) + ".wav", 
+                       22050)
+        ######################################################################
+        ######################################################################
+        ######################################################################
 
         cur_save_path = SAVE_PATH + "_e" + str(epoch) + ".pth"
         torch.save(model.state_dict(), cur_save_path)
         print("   Saved model to " + cur_save_path)
-        print('   ======== Epoch: {} \tLoss: {:.6f} ========'.format(epoch, train_loss.sum()))
+        print('   ======== Epoch: {} \tLoss: {:.6f} ========'.format(epoch, epoch_loss))
 
 def test_model_s(model, input_data, target_data):
     model.eval()
@@ -182,8 +196,8 @@ def test_model_s(model, input_data, target_data):
 
     loss = nn.MSELoss()
     with torch.no_grad():
-        output = model(input_data.double())
-        test_loss = loss(output, target_data.double()).sum()
+        output = model(input_data)
+        test_loss = loss(output, target_data).sum()
 
     print('\nTest set --- loss sum: {:.4f}'.format(test_loss))
     return output
