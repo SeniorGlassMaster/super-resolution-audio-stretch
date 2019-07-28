@@ -61,46 +61,46 @@ class Pre_Upscale_Spectrogram_Model(nn.Module):
         self.conv1 = nn.Conv2d(2,64,(1,1))
         self.rel1 = nn.ReLU()
 
-        self.pad2 = nn.ReflectionPad2d((1,1,1,1))
-        self.conv2 = nn.Conv2d(64,32,(3,3))
-        self.rel2 = nn.ReLU()
+        # self.pad2 = nn.ReflectionPad2d((1,1,1,1))
+        # self.conv2 = nn.Conv2d(64,32,(3,3))
+        # self.rel2 = nn.ReLU()
 
-        self.pad3 = nn.ReflectionPad2d((1,1,1,1))
-        self.conv3 = nn.Conv2d(32,16,(3,3))
-        self.rel3 = nn.ReLU()
+        # self.pad3 = nn.ReflectionPad2d((1,1,1,1))
+        # self.conv3 = nn.Conv2d(32,16,(3,3))
+        # self.rel3 = nn.ReLU()
 
-        self.pad4 = nn.ReflectionPad2d((1,1,1,1))
-        self.conv4 = nn.Conv2d(16,8,(3,3))
-        self.rel4 = nn.ReLU()
+        # self.pad4 = nn.ReflectionPad2d((1,1,1,1))
+        # self.conv4 = nn.Conv2d(16,8,(3,3))
+        # self.rel4 = nn.ReLU()
 
-        self.pad5 = nn.ReflectionPad2d((1,1,1,1))
-        self.conv5 = nn.Conv2d(8,4,(3,3))
-        self.rel5 = nn.ReLU()
+        # self.pad5 = nn.ReflectionPad2d((1,1,1,1))
+        # self.conv5 = nn.Conv2d(8,4,(3,3))
+        # self.rel5 = nn.ReLU()
 
-        self.pad6 = nn.ReflectionPad2d((1,1,1,1))
-        self.conv6 = nn.Conv2d(4,2,(3,3))
+        # self.pad6 = nn.ReflectionPad2d((1,1,1,1))
+        self.conv6 = nn.Conv2d(64,2,(1,1))
 
     def forward(self, input):
         out = self.conv1(input)
         out = self.rel1(out)
 
-        out = self.pad2(out)
-        out = self.conv2(out)
-        out = self.rel2(out)
+        # out = self.pad2(out)
+        # out = self.conv2(out)
+        # out = self.rel2(out)
 
-        out = self.pad3(out)
-        out = self.conv3(out)
-        out = self.rel3(out)
+        # out = self.pad3(out)
+        # out = self.conv3(out)
+        # out = self.rel3(out)
 
-        out = self.pad4(out)
-        out = self.conv4(out)
-        out = self.rel4(out)
+        # out = self.pad4(out)
+        # out = self.conv4(out)
+        # out = self.rel4(out)
 
-        out = self.pad5(out)
-        out = self.conv5(out)
-        out = self.rel5(out)
+        # out = self.pad5(out)
+        # out = self.conv5(out)
+        # out = self.rel5(out)
 
-        out = self.pad6(out)
+        # out = self.pad6(out)
         out = self.conv6(out)
         return out
 
