@@ -12,10 +12,10 @@ OVERLAP = 50
 
 # Spectrogram settings:
 NPERSEG = 512
-BATCHES_PER_EPOCH = 1
+BATCHES_PER_EPOCH = 10
 
 NUM_EPOCHS = 100
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-2
 
 MODEL_NAME = "pre_s_model_0"
 SAVE_PATH = "./model_saves/" + MODEL_NAME
